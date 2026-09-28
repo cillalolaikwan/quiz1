@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1e3c72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>國家任務 - 知識問答溫習</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      color: #333;
+    }
+
+    /* 手機容器 */
+    .app-container {
+      width: 100%;
+      max-width: 460px;
+      height: 92dvh;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 頂部標頭 */
+    .header {
+      background: #c0392b;
+      color: white;
+      padding: 16px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .header p {
+      font-size: 0.8rem;
+      opacity: 0.9;
+      margin-top: 3px;
+    }
+
+    /* 主要內容區 */
+    .content {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+    }
+
+    /* 模式選擇畫面 */
+    .menu-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      height: 100%;
+      text-align: center;
+    }
+
+    .menu-title {
+      font-size: 1.2rem;
+      color: #2c3e50;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: #27ae60;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #2980b9;
+      color: white;
+    }
+
+    .btn-next {
+      background: #e67e22;
+      color: white;
+      margin-top: 15px;
+      display: none;
+    }
+
+    /* 答題畫面 */
+    .quiz-screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      justify-content: space-between;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #27ae60;
+      transition: width 0.25s ease;
+    }
+
+    .quiz-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .question-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: #1e293b;
+      min-height: 90px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 14px 16px;
+      text-align: left;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      line-height: 1.4;
+      cursor: pointer;
+      color: #333;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .option-btn.correct {
+      background: #d4edda !important;
+      border-color: #28a745 !important;
+      color: #155724 !important;
+      font-weight: bold;
+    }
+
+    .option-btn.wrong {
+      background: #f8d7da !important;
+      border-color: #dc3545 !important;
+      color: #721c24 !important;
+    }
+
+    .feedback-msg {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+      line-height: 1.4;
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    /* 結算畫面 */
+    .result-screen {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .score-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+    }
+
+    .score-number {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 8px 0;
+    }
+
+    .result-details {
+      font-size: 0.95rem;
+      color: #475569;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="header">
+    <h1>國家任務 題目溫習</h1>
+    <p>知識問答與溫習測試</p>
+  </div>
+
+  <div class="content">
+    <!-- 主選單 -->
+    <div id="menu-screen" class="menu-screen">
+      <div class="menu-title">請選擇測驗模式</div>
+      <button class="btn btn-primary" onclick="startGame(1)">模式 1：隨機 20 題</button>
+      <button class="btn btn-secondary" onclick="startGame(2)">模式 2：全題庫測驗</button>
+    </div>
+
+    <!-- 答題畫面 -->
+    <div id="quiz-screen" class="quiz-screen">
+      <div>
+        <div class="progress-bar-bg">
+          <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+
+        <div class="quiz-info">
+          <span id="question-count">第 1 題</span>
+          <span id="score-count">得分：0</span>
+        </div>
+
+        <div id="question-text" class="question-card">載入中...</div>
+
+        <div id="options-container" class="options-container"></div>
+
+        <div id="feedback-msg" class="feedback-msg"></div>
+      </div>
+
+      <button id="next-btn" class="btn btn-next" onclick="nextQuestion()">下一題 ➔</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-screen" class="result-screen">
+      <h2 style="color: #2c3e50; font-size: 1.4rem;">測驗完成</h2>
+      
+      <div class="score-box">
+        <div style="font-size:0.85rem; color:#64748b; font-weight:bold;">總得分</div>
+        <div id="final-score" class="score-number">0</div>
+        <div class="result-details" id="result-details"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="showMenu()">返回主選單</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const rawQuestions = [
+    {
+      q: "根據《香港國安法》，駐香港特別行政區維護國家安全公署應當加強與中央駐香港機構的工作聯繫和工作協同。以下哪個機構不包括在內？",
+      a: "新華通訊社香港分社",
+      options: ["新華通訊社香港分社", "外交部駐香港特別行政區特派員公署", "中國人民解放軍駐香港部隊", "中央人民政府駐香港特別行政區聯絡辦公室"]
+    },
+    {
+      q: "以下哪項不是《香港國安法》規定的原則？",
+      a: "事可再審原則",
+      options: ["事可再審原則", "法治原則", "罪刑法定原則", "無罪推定原則"]
+    },
+    {
+      q: "以下哪句子與生態安全有最直接的關係？",
+      a: "綠水青山就是金山銀山",
+      options: ["綠水青山就是金山銀山", "科技是第一生產力", "發展是硬道理", "倉婈實而知禮節"]
+    },
+    {
+      q: "根據《香港國安法》，香港特別行政區政府的哪個機關設立維護國家安全的部門，配備執法力量？",
+      a: "警務處",
+      options: ["警務處", "海關", "入境事務處", "懲教署"]
+    },
+    {
+      q: "根據《基本法》，《基本法》的解釋權屬於以下哪個機關？",
+      a: "全國人民代表大會常務委員會",
+      options: ["全國人民代表大會常務委員會", "香港特別行政區終審法院", "全國人民代表大會", "國務院"]
+    },
+    {
+      q: "根據《維護國家安全條例》，以下哪位官員可就國家安全教育等事宜，向其認為適當的人，提供意見或發出指示？",
+      a: "政務司司長",
+      options: ["政務司司長", "財政司司長", "律政司司長", "保安局局長"]
+    },
+    {
+      q: "《維護國家安全條例》是根據以下哪份法律文件的規定而立法？",
+      a: "《中華人民共和國香港特別行政區基本法》",
+      options: ["《中華人民共和國香港特別行政區基本法》", "《中華人民共和國憲法》", "《香港國安法》", "《世界人權宣言》"]
+    },
+    {
+      q: "根據「十五五」規劃綱要，下列哪項與我國國防和軍隊現代化的內容無關？",
+      a: "壯大核武威懾力量",
+      options: ["壯大核武威懾力量", "提高國防和軍隊現代化質量效益", "促進國防實力和經濟實力同步提升", "構建一體化國家戰略體系和能力"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，以下哪項是維護國家安全的首要任務？",
+      a: "維護國家統一和領土完整",
+      options: ["維護國家統一和領土完整", "發展經濟和提高人民生活水平", "加強國際合作與科技交流", "保障糧食與能源供應"]
+    },
+    {
+      q: "根據《基本法》，香港特別行政區是中華人民共和國的一個享有高度自治權的地方行政區域，直轄於____。",
+      a: "中央人民政府",
+      options: ["中央人民政府", "全國人民代表大會", "全國人民代表大會常務委員會", "中共中央政治局"]
+    },
+    {
+      q: "根據《香港國安法》，香港特別行政區居民在參選或者就任公職時應當依法簽署文件確認或者宣誓擁護以下哪一份法律文件，效忠中華人民共和國香港特別行政區？",
+      a: "《中華人民共和國香港特別行政區基本法》",
+      options: ["《中華人民共和國香港特別行政區基本法》", "《中華人民共和國憲法》", "《維護國家安全條例》", "《中華人民共和國國籍法》"]
+    },
+    {
+      q: "根據《香港修例風波真相》，教育局建議如何防範敵對勢力入侵校園？",
+      a: "做好價值觀教育，培養學生的愛國心",
+      options: ["做好價值觀教育，培養學生的愛國心", "安裝全面監控系統，限制學生言論", "增加軍事化訓練，實施嚴格戒嚴", "停辦所有社會科學與人文課程"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，以下哪項是深海安全的焦點？",
+      a: "防範來自海洋的安全威脅和探索深海資源",
+      options: ["防範來自海洋的安全威脅和探索深海資源", "發展海上旅遊業和建立水上樂園", "擴建沿海城市和填海造地", "限制所有外國船隻進入領海"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，以下哪項不是國土安全涵蓋的要素？",
+      a: "軍事力量",
+      options: ["軍事力量", "領土", "領海", "領空"]
+    },
+    {
+      q: "《維護國家安全條例》中關於「國家秘密」的定義主要考量甚麼？",
+      a: "在沒有合法權限下披露，相當可能會損害國家安全的資訊",
+      options: ["在沒有合法權限下披露，相當可能會損害國家安全的資訊", "任何商業機構的內部財務數據", "政府官員的個人私人生活隱私", "未經公開發表的學術研究論文"]
+    },
+    {
+      q: "根據《「一國兩制」下香港維護國家安全的實踐》白皮書，《香港國安法》實施5年多來，檢控的危害國家安全犯罪案件佔全部刑事犯罪案件的比例不到多少個百分比？",
+      a: "百分之零點二",
+      options: ["百分之零點二", "百分之二", "百分之五", "百分之十"]
+    },
+    {
+      q: "香港警務處國家安全處開設「國安處舉報熱線」，市民可通過哪些渠道向警務處作出與國家安全相關的非緊急舉報？",
+      a: "微信帳號、電話短訊及專設電郵",
+      options: ["微信帳號、電話短訊及專設電郵", "郵寄信件、報章廣告及親身到警署", "社交平台留言、傳真及電視廣播", "僅限於親身到高等法院進行登記"]
+    },
+    {
+      q: "根據《基本法》，擔任香港特別行政區行政長官的中國公民必須符合以下哪項條件？",
+      a: "年滿四十周歲，在外國無居留權，並在香港通常居住連續滿二十年",
+      options: [
+        "年滿四十周歲，在外國無居留權，並在香港通常居住連續滿二十年",
+        "年滿三十五周歲，在外國無居留權，並在香港通常居住連續滿十年",
+        "年滿四十周歲，允許有外國居留權，並在香港通常居住連續滿十五年",
+        "年滿四十五周歲，在外國無居留權，並在香港通常居住連續滿二十五年"
+      ]
+    },
+    {
+      q: "中國共產黨第一次全國代表大會選出誰擔任中央局書記(中國共產黨的領導者)？",
+      a: "陳獨秀",
+      options: ["陳獨秀", "毛澤東", "李大釗", "周恩來"]
+    },
+    {
+      q: "根據《香港修例風波真相》，有言語治療師編撰羊村故事繪本，他們的目的是甚麼？",
+      a: "向心智未成熟的同學宣揚仇恨政府的對抗思想",
+      options: ["向心智未成熟的同學宣揚仇恨政府的對抗思想", "推廣兒童語言發展與語文學習", "宣傳環境保護與動物權益保護", "提升幼兒的繪畫與藝術鑑賞能力"]
+    },
+    {
+      q: "紅軍長征時打算攻破臘子口，而敵軍在當地兩邊崖壁之間唯一通道上固守窄橋。以下哪一項不是紅軍攻破敵軍時所用的策略？",
+      a: "採用火攻，焚燒木橋",
+      options: ["採用火攻，焚燒木橋", "攀登絕壁，繞到敵後襲擊", "正面集結兵力發動猛烈進攻", "配合正面進攻組織突擊隊衝鋒"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，中國就太空安全採取何種態度？",
+      a: "倡導世界各國在平等互利、和平利用和包容發展的基礎上，深化國際交流合作",
+      options: [
+        "倡導世界各國在平等互利、和平利用和包容發展的基礎上，深化國際交流合作",
+        "主導太空軍備競賽並封鎖軌道資源",
+        "獨佔外太空資源並禁止其他國家進入",
+        "拒絕參與任何形式的國際太空合作"
+      ]
+    },
+    {
+      q: "根據《維護國家安全條例》，任何人如意圖帶來干預效果，而配合哪些組織使用不當手段作出危害國家安全的作為，就會觸犯該《條例》？",
+      a: "外國政治組織",
+      options: ["外國政治組織", "本地慈善團體", "學術研究機構", "環保非政府組織"]
+    },
+    {
+      q: "根據《基本法》，香港特別行政區立法會除了第一屆外，其他每屆的任期在一般情況下為多少年？",
+      a: "4年",
+      options: ["4年", "2年", "3年", "5年"]
+    },
+    {
+      q: "根據《維護國家安全條例》，以下哪項有關「禁止從事危害國家安全活動的組織在特區運作」的描述正確？",
+      a: "與境外政治性組織有聯繫的本地政治性團體受相關條文規管",
+      options: [
+        "與境外政治性組織有聯繫的本地政治性團體受相關條文規管",
+        "所有本地體育會和藝術團體均被禁止運作",
+        "只有未經註冊的公司受規管，註冊社團不受規管",
+        "只要不接受海外捐款，任何行為均不受規管"
+      ]
+    },
+    {
+      q: "根據《香港國安法》，中央人民政府駐香港特別行政區維護國家安全公署的經費由以下哪項提供保障？",
+      a: "中央財政",
+      options: ["中央財政", "香港特別行政區政府財政", "社會捐款與基金", "聯合國維安專款"]
+    },
+    {
+      q: "全國人民代表大會常務委員會在哪年通過最早版本的《中華人民共和國國徽法》？",
+      a: "1991",
+      options: ["1991", "1982", "1990", "1997"]
+    },
+    {
+      q: "《維護國家安全條例》於哪天刊憲生效？",
+      a: "2024年3月23日",
+      options: ["2024年3月23日", "2020年6月30日", "2021年12月19日", "2023年7月1日"]
+    },
+    {
+      q: "根據「十五五」規劃綱要，下列哪項與有效維護社會安全穩定無關？",
+      a: "推進數字中國建設",
+      options: ["推進數字中國建設", "完善社會治安整體防控體系", "健全國家應急管理體系", "加強和創新社會治理"]
+    },
+    {
+      q: "根據「十五五」規劃綱要，以下哪一項不是「十五五」規劃關於維護糧食安全的主張？",
+      a: "加強農作物基因改造",
+      options: ["加強農作物基因改造", "實施藏糧於地、藏糧於技戰術", "堅持最嚴格的耕地保護制度", "推進高標準農田建設"]
+    },
+    {
+      q: "根據《「一國兩制」下香港維護國家安全的實踐》白皮書，聯合國在哪年通過決議，將香港和澳門從反殖民主義宣言適用的殖民地名單中刪去？",
+      a: "1972",
+      options: ["1972", "1945", "1984", "1997"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，以下哪項與文化安全的描述無關？",
+      a: "文化霸權",
+      options: ["文化霸權", "文化主權", "理想信念", "主流價值體系"]
+    },
+    {
+      q: "根據《基本法》，中國其他地區的人進入香港特別行政區須辦理批准手續，其中進入香港特別行政區定居的人數是怎樣確定的？",
+      a: "由中央人民政府主管部門徵求香港特別行政區政府的意見後確定",
+      options: [
+        "由中央人民政府主管部門徵求香港特別行政區政府的意見後確定",
+        "由香港特別行政區政府單方面全權決定",
+        "由聯合國難民署統一協調確定",
+        "由各省級人民政府自行核准決定"
+      ]
+    },
+    {
+      q: "為脅迫中央人民政府和香港特別行政區政府以圖實現政治主張，組織、策劃、實施、參與實施或者威脅實施恐怖活動，即犯了《香港國安法》規定的哪種罪行？",
+      a: "恐怖活動罪",
+      options: ["恐怖活動罪", "分裂國家罪", "顛覆國家政權罪", "勾結外國或者境外勢力危害國家安全罪"]
+    },
+    {
+      q: "根據「十五五」規劃綱要，以下哪一項不是「十五五」規劃關於維護資源安全的主張？",
+      a: "開始發展核能發電",
+      options: ["開始發展核能發電", "加強礦產資源勘查開發和增儲上產", "推進資源節約集約循環利用", "提高重要資源戰略儲備能力"]
+    },
+    {
+      q: "根據《香港國安法》，香港特別行政區本地法律規定與《香港國安法》不一致時，適用哪項法律規定？",
+      a: "《香港國安法》",
+      options: ["《香港國安法》", "本地法律規定", "國際公約規定", "由法院逐案酌情決定"]
+    },
+    {
+      q: "網絡安全講求保障網絡數據的完整性、保密性、____的能力。",
+      a: "可用性",
+      options: ["可用性", "流暢性", "普及性", "商業性"]
+    },
+    {
+      q: "中央人民政府派駐香港的軍隊有甚麼職責？",
+      a: "負責香港特別行政區的防務",
+      options: ["負責香港特別行政區的防務", "負責香港特別行政區的治安維護", "負責香港特別行政區的出入境管理", "負責香港特別行政區的稅收徵管"]
+    },
+    {
+      q: "文化安全是指一國的____、理想信念、主流價值體系等觀念形態的文化特徵、文化主權處於相對沒有危險和不受內外威脅的狀態。",
+      a: "民族精神",
+      options: ["民族精神", "經濟實力", "科技水平", "軍事裝備"]
+    },
+    {
+      q: "以下哪種行為最有可能被視為觸犯《香港國安法》中的分裂國家罪？",
+      a: "組織旨在將香港從中國分離出去的行為",
+      options: ["組織旨在將香港從中國分離出去的行為", "對政府政策提出合法批評與建議", "參加獲警方發出不反對通知書的遊行", "在立法會表達不同的政見"]
+    },
+    {
+      q: "總體國家安全觀的「五個統籌」當中，不包括以下哪項？",
+      a: "統籌政權安全和政府安全",
+      options: ["統籌政權安全和政府安全", "統籌內部安全和外部安全", "統籌國土安全和國民安全", "統籌傳統安全和非傳統安全"]
+    },
+    {
+      q: "根據《「一國兩制」下香港維護國家安全的實踐》白皮書，以下哪項描述《香港國安法》與香港本地法律的關係是不正確的？",
+      a: "從屬",
+      options: ["從屬", "優先", "補充", "協同"]
+    },
+    {
+      q: "以下哪位官員應當就香港特別行政區維護國家安全事務向中央人民政府負責，並提交年度報告？",
+      a: "行政長官",
+      options: ["行政長官", "政務司司長", "終審法院首席法官", "保安局局長"]
+    },
+    {
+      q: "根據《香港修例風波真相》，造成香港特別行政區21世紀10年代的幾場社會動盪，主要源於以下哪項因素？",
+      a: "境外勢力和反中亂港分子",
+      options: ["境外勢力和反中亂港分子", "自然災害及經濟衰退", "警民比例嚴重失衡", "語言文化差異過大"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，以下哪項是我國需要擁有一支強大軍隊的主要原因？",
+      a: "可以保障國家主權、安全和發展利益",
+      options: ["可以保障國家主權、安全和發展利益", "用於向外擴張和征服其他國家", "展示軍事威懾以干涉他國內政", "增加國防預算以帶動工業增長"]
+    },
+    {
+      q: "根據「全民國家安全教育日」網站，以下哪項是總體國家安全觀的第一要素與核心價值？",
+      a: "人民安全",
+      options: ["人民安全", "經濟安全", "網絡安全", "生態安全"]
+    },
+    {
+      q: "哪位中國共產黨領導人曾任中國工農紅軍總司令？",
+      a: "朱德",
+      options: ["朱德", "彭德懷", "林彪", "粟裕"]
+    },
+    {
+      q: "《中華人民共和國國家安全法》第三十二條有關條文與以下哪幾個國家安全重點領域有最直接的關係？",
+      a: "太空安全、深海安全、極地安全",
+      options: ["太空安全、深海安全、極地安全", "網絡安全、數據安全、科技安全", "糧食安全、資源安全、生態安全", "軍事安全、國土安全、經濟安全"]
+    },
+    {
+      q: "中國國旗上的四顆小星都有一個尖角指向哪裏，象徵圍繞著一個中心團結？",
+      a: "大星中心點",
+      options: ["大星中心點", "旗桿方向", "右下角", "左上角"]
+    },
+    {
+      q: "《香港國安法》第一條訂明，該法是根據我國《憲法》、《香港基本法》和以下哪機構的決定而制定？",
+      a: "全國人民代表大會",
+      options: ["全國人民代表大會", "全國人民代表大會常務委員會", "國務院", "最高人民法院"]
+    },
+    {
+      q: "根據總體國家安全觀資料小冊子，以下哪項有關海外利益安全的描述是不正確的？",
+      a: "確保海外的大自然災害不會影響我國",
+      options: ["確保海外的大自然災害不會影響我國", "保障海外中國公民與企業合法權益", "維護海外資產與供應鏈安全", "促進國際和平與安全"]
+    },
+    {
+      q: "《維護國家安全條例》賦權哪位官員刊憲指明已潛逃的人，並撤銷特區護照？",
+      a: "保安局局長",
+      options: ["保安局局長", "入境事務處處長", "警務處處長", "律政司司長"]
+    },
+    {
+      q: "以下哪個紀律部隊專責實施嚴格的出入境及簽證管制，配合執行維護國家安全的工作？",
+      a: "入境事務處",
+      options: ["入境事務處", "香港海關", "懲教署", "消防處"]
+    },
+    {
+      q: "紅軍三支主力部隊包括紅一方面軍、紅二方面軍和紅四方面軍，在哪個省份會師，標誌了「紅軍長征勝利」？",
+      a: "甘肅",
+      options: ["甘肅", "陝西", "貴州", "四川"]
+    },
+    {
+      q: "根據「全民國家安全教育日」網站，以下哪項不屬於習近平總書記提出的「十個堅持」？",
+      a: "堅持從外國進口穀物，以保障糧食安全",
+      options: ["堅持從外國進口穀物，以保障糧食安全", "堅持黨對國家安全工作的絕對領導", "堅持中國特色國家安全道路", "堅持把國家安全放在優先發展的戰略位置"]
+    }
+  ];
+
+  let currentQuestions = [];
+  let currentIndex = 0;
+  let score = 0;
+  let canAnswer = true;
+
+  function shuffle(array) {
+    let arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function startGame(mode) {
+    score = 0;
+    currentIndex = 0;
+    canAnswer = true;
+
+    let pool = shuffle(rawQuestions);
+    currentQuestions = (mode === 1) ? pool.slice(0, 20) : pool;
+
+    document.getElementById("menu-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("quiz-screen").style.display = "flex";
+
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    canAnswer = true;
+    document.getElementById("next-btn").style.display = "none";
+    document.getElementById("feedback-msg").style.display = "none";
+
+    let qData = currentQuestions[currentIndex];
+    let total = currentQuestions.length;
+    let progress = (currentIndex / total) * 100;
+
+    document.getElementById("progress-bar").style.width = progress + "%";
+    document.getElementById("question-count").innerText = `第 ${currentIndex + 1} / ${total} 題`;
+    document.getElementById("score-count").innerText = `得分：${score}`;
+    document.getElementById("question-text").innerText = `${currentIndex + 1}. ${qData.q}`;
+
+    let shuffledOptions = shuffle(qData.options);
+    let container = document.getElementById("options-container");
+    container.innerHTML = "";
+
+    const labels = ["A", "B", "C", "D"];
+    shuffledOptions.forEach((optText, idx) => {
+      let btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.innerHTML = `<strong>${labels[idx]}.</strong> <span>${optText}</span>`;
+      btn.onclick = () => checkAnswer(btn, optText, qData.a);
+      container.appendChild(btn);
+    });
+  }
+
+  function checkAnswer(selectedBtn, selectedText, correctText) {
+    if (!canAnswer) return;
+    canAnswer = false;
+
+    let allBtns = document.querySelectorAll(".option-btn");
+
+    if (selectedText === correctText) {
+      selectedBtn.classList.add("correct");
+      score += 5; // 每題固定 5 分
+      document.getElementById("score-count").innerText = `得分：${score}`;
+      
+      setTimeout(() => {
+        nextQuestion();
+      }, 600);
+    } else {
+      selectedBtn.classList.add("wrong");
+      allBtns.forEach(btn => {
+        if (btn.innerText.includes(correctText)) {
+          btn.classList.add("correct");
+        }
+      });
+
+      let feedback = document.getElementById("feedback-msg");
+      feedback.innerText = `❌ 回答錯誤！正確答案是：\n${correctText}`;
+      feedback.style.display = "block";
+      document.getElementById("next-btn").style.display = "block";
+    }
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < currentQuestions.length) {
+      loadQuestion();
+    } else {
+      endGame();
+    }
+  }
+
+  function endGame() {
+    document.getElementById("quiz-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "flex";
+
+    let total = currentQuestions.length;
+    let correctCount = score / 5;
+    let accuracy = Math.round((correctCount / total) * 100);
+
+    document.getElementById("final-score").innerText = score;
+    
+    let evalText = "";
+    if (accuracy === 100) evalText = "全對滿分，概念非常扎實！";
+    else if (accuracy >= 80) evalText = "表現優秀，大部分題目皆已掌握！";
+    else if (accuracy >= 60) evalText = "順利合格，建議針對錯題加強溫習。";
+    else evalText = "建議重新閱讀資料，多加練習！";
+
+    document.getElementById("result-details").innerHTML = `
+      答對題數：<strong>${correctCount} / ${total}</strong> 題<br>
+      正確率：<strong>${accuracy}%</strong><br><br>
+      ${evalText}
+    `;
+  }
+
+  function showMenu() {
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("menu-screen").style.display = "flex";
+  }
+</script>
+
+</body>
+</html>
